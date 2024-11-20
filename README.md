@@ -488,7 +488,7 @@ class DietsTable extends Component
         $this->modal = true;
     }
 
-    public function openModal(Diet $diet = null, bool $isEditing = false){
+    public function openModal(Diet $diet = null, bool $isEditing = true){
         if ($diet){
             $this -> title = $diet -> title;
             $this -> fecha = $diet -> fecha;
@@ -578,7 +578,7 @@ Bien, como has podido notar, esto está incompleto, pero de momento, podemos dej
 
 ### 6.3. LOS BOTONES MUESTRAN EL MODAL
 En el componente **HTML**, definimos previamente algo muy importante, y es que los **3 iconos svg** y el **botón superior** de la tabla cuando son presionados, llaman al método `openModal`, para esto, necesitamos varios pasos:
-* **En el caso del botón** debemos añadirle en las propiedades de la etiqueta un `wire:click="openModal(null, true)"`, que significa que cuando es clickado, *livewire llama al componente* y ejecuta el método `openModal` pasándole dos atributos, un `null`, ya que aquí estamos creando una dieta, por lo tanto no seleccionamos ninguna y es nula la dieta que le pasamos, y un `true`, que significa que los valores del modal serán editables para poder ser introducidos al crear la dieta.
+* **En el caso del botón** debemos añadirle en las propiedades de la etiqueta un `wire:click="openModal"`, que significa que cuando es clickado, *livewire llama al componente* y ejecuta el método `openModal` pasándole ningún atributo, para que use los que tiene el método definidos por defecto.
 * **En el caso de los svg** debemos meterlos dentro de un `<a></a>`, que usará el mismo `wire:click="openModal({{$diet, true}})"`, sólo que aquí, **las propiedades cambiarán** dependiendo del botón seleccionado, por ejemplo, el de ***ver la dieta*** pasará un `({{$diet}}, false)`, ya que *queremos ver una dieta específica pero no editar sus campos*, con el de ***borrar una dieta*** llamaremos a *otro método aún no creado* y con el de ***editar la dieta*** pasaremos `({{$diet}}, true)`, ya que *queremos ver los valores de la dieta y poder cambiarlos*.
 * `@if (isEditing)` usamos esto para definir cuándo el campo es editable o no, si no lo es, mostrará el texto en un `<p></p>`, pero al serlo, será un `<input></input>`.
 
