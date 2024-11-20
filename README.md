@@ -517,7 +517,6 @@ Ahora vamos a volver a `resources/views/livewire/diets-table.blade.php` y vamos 
 
 ```
 @if ($modal){
-  <!-- component -->
 <div class="fixed left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 py-10">
   <div class="max-h-full w-full max-w-xl overflow-y-auto sm:rounded-2xl bg-white">
     <div class="w-full">
@@ -527,7 +526,7 @@ Ahora vamos a volver a `resources/views/livewire/diets-table.blade.php` y vamos 
           
           <label for="name">Nombre de la dieta: </label>
           @if ($isEditing)
-            <input type="text" id="name" name="name" wire:model="Diet" value="{{ isset($myDiet) ? $myDiet->title : '' }}">
+            <input type="text" id="name" name="title" wire:model="title" value="{{ isset($myDiet) ? $myDiet->title : '' }}">
           @else
             <p>{{$myDiet->title}}</p>
           @endif
@@ -536,7 +535,7 @@ Ahora vamos a volver a `resources/views/livewire/diets-table.blade.php` y vamos 
 
           <label for="description">Descripción de la dieta: </label>
           @if ($isEditing)
-            <input type="text" id="description" name="description" wire:model="Diet" value="{{ isset($myDiet) ? $myDiet->description : '' }}">
+            <input type="text" id="description" name="description" wire:model="description" value="{{ isset($myDiet) ? $myDiet->description : '' }}">
           @else
             <p>{{$myDiet->description}}</p>
           @endif
@@ -548,32 +547,21 @@ Ahora vamos a volver a `resources/views/livewire/diets-table.blade.php` y vamos 
 
           <br>
 
-          <label for="name">Calorías de la dieta de la dieta: </label>
+          <label for="totalCalories">Calorías de la dieta de la dieta: </label>
           @if ($isEditing)
-            <input type="text" id="name" name="name" wire:model="Diet" value="{{ isset($myDiet) ? $myDiet->totalCalories : '' }}">
+            <input type="text" id="totalCalories" name="totalCalories" wire:model="totalCalories" value="{{ isset($myDiet) ? $myDiet->totalCalories : '' }}">
           @else
             <p>{{$myDiet->totalCalories}}</p>
           @endif
 
-        </div>
-        <div class="space-y-4">
-          <button class="p-3 bg-black rounded-full text-white w-full font-semibold">Allow notifications</button>
-          <button class="p-3 bg-white border rounded-full w-full font-semibold">Skip for now</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-}
-    
-@endif
 ```
 
 Vamos a ver qué hacemos aquí:
 * `@if ($modal)`: comprueba si la variable booleana en el componente es **true** para ejecutar su código.
 * **Modal**: cogido de ***livewirecomponents***, cualquiera nos vale, pero escogí uno que ya trajese botones incorporados para facilitar nuestro trabajo más adelante.
-* `<label>` e `<input>`, que por ahora, tenemos la lógica a la mitad en este código, pero analizamos que lo que hace la aplicación es poner un `<label>` que indicará el nombre del campo a informar, en el primer caso, ***Nombre de la dieta***, y justo al lado, un `<input>` al que le pasamos dos cosas importantes; `wire:model="Diet"`, que referencia al modelo al que corresponde, y `value="{{ isset($myDiet) ? $myDiet->title : '' }}"`, que le dará el valor al campo en el caso de ser una consulta de **edición**.
+* `<label>` e `<input>`, que por ahora, tenemos la lógica a la mitad en este código, pero analizamos que lo que hace la aplicación es poner un `<label>` que indicará el nombre del campo a informar, en el primer caso, ***Nombre de la dieta***, y justo al lado, un `<input>` al que le pasamos dos cosas importantes; `wire:model="title"`, que referencia al campo al que corresponde, y `value="{{ isset($myDiet) ? $myDiet->title : '' }}"`, que le dará el valor al campo en el caso de ser una consulta de **edición**.
 * `@endif`: termina el if.
+* **DESTACAR** que `name=""` debe llamarse igual que el campo al que refiere.
 
 Bien, como has podido notar, esto está incompleto, pero de momento, podemos dejarlo así, esto nos servirá para ver si nuestro modal coge algún dato ya de, si por ejemplo, *en la tabla seleccionamos la Dieta 1*, que nos muestre en el modal el nombre de esa dieta. Sin embargo, no tenemos definido **que los botones nos lleven a hacer aparecer el modal**.
 
@@ -587,9 +575,63 @@ En el componente **HTML**, definimos previamente algo muy importante, y es que l
 Vale, ahora el modal, dijimos que *habíamos seleccionado uno con dos botones para usarlos*, pues empecemos a programar la funcionalidad del segundo botón, que es sencilla, aunque primero **cambiamos el nombre al botón**; `<button wire:click="closeModal" class="p-3 bg-white border rounded-full w-full font-semibold">Cerrar</button>`, al cuál le hemos añadido la funcionalidad del click, pero debemos ahora **programar el método closeModal** en `app/Livewire/DietsTable.php`:
 
 ```
- public function closeModal(){
+    public function closeModal(){
         $this->modal = false;
     }
 ```
 
 Tan simple como **cambiar el modal a false**.
+
+### 6.5. BOTÓN DE GUARDAR/ACTUALIZAR UNA DIETA
+Bien, ahora debemos empezar con la lógica del primer botón, que o bien guardará la dieta y la insertará, o bien la actualizará, bien, lo primero es cambiar el **componente HTML**:
+
+```
+        <div class="space-y-4">
+          @if ($isEditing)
+            <button wire:click="updateCreateDiet" class="p-3 bg-black rounded-full text-white w-full font-semibold">
+              {{isset($myDiet->id) ? 'Actualizar dieta' : 'Crear dieta'}}
+            </button>
+          @endif
+          <button wire:click="closeModal" class="p-3 bg-white border rounded-full w-full font-semibold">Cerrar</button>
+        </div>
+```
+
+Bien, con esto hacemos que ***únicamente*** cuando los campos son editables se permita ver un **botón que permite guardar los cambios**, ya que si sólo estamos *viendo* no hay cambios que puedan ser guardados.
+
+A parte, estamos configurando que **el nombre del botón varie** dependiendo de si **la dieta es nula o no**, al no serlo, mostrará *actualizar dieta*, al ser nulo, *Crear dieta*.
+Pero, este botón llama a una nueva función, que o bien la crea o actualiza, pero que no hemos creado, por lo que nos vamos a ello:
+
+```
+    public function updateCreateDiet(){
+        if ($this -> myDiet->id){
+            $diet = Diet::find($this -> myDiet->id);
+            $diet -> update([
+                'title' => $this -> title,
+                'fecha' => now(),
+                'description' => $this -> description,
+                'totalCalories' => $this -> totalCalories
+            ]);
+        } else {
+            $newDiet = new Diet();
+            $newDiet -> title = $this -> title;
+            $newDiet -> fecha = now();
+            $newDiet -> description = $this -> description;
+            $newDiet -> totalCalories = $this -> totalCalories;
+            $newDiet -> user_id = Auth::id();
+            $newDiet -> save();
+        }
+
+        $this -> clearFields();
+        $this -> modal = false;
+        $this -> diets = $this -> getDiets();
+    }
+
+
+    public function getDiets(){
+        return Diet::all();
+    }
+```
+
+Tenemos dos funciones, la primera `public function updateCreateDiet(){` usa un `@if ()` que comprueba que la dieta tenga un **id** pasa saber *si es nueva o se está actualizando*, y hacer así una función u otra.
+
+Por otro lado, la función al final llama a otra llamada `getDiets()`, que definimos debajo, y simplemente actualiza la tabla principal para que **no tengamos que recargar la web de forma manual**.
