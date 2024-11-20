@@ -414,7 +414,7 @@ Ahora, nos vamos a `resources/livewire/diets-table.blade.php` y añadimos la ló
 </section>
 ```
 
-Aquí, basicamente nos cogemos una *tabla pre-hecha* de **tailwindcomponents** y a esta le creamos un `@foreach` para que **nos muestre cada una de las dietas de ese usuario** y terminamos el bucle con un `@endforeach`.
+Aquí, basicamente nos cogemos una *tabla pre-hecha* de **tailwindcomponents** y a esta le creamos un `@foreach` para que **nos muestre cada una de las dietas de ese usuario** y terminamos el bucle con un `@endforeach`. **IMPORTANTE** que todo el componente debe estar entre un `<section></section>`.
 
 **Cabe resaltar** que al final de la tabla, metimos una tabla que usa ***svg's*** como iconos para que luego podamos darle una funcionalidad al ser clicados y que muestren los futuros **Modales**.
 
@@ -510,3 +510,43 @@ Vale, aquí hacemos varias cosas que nos van a resultar interesantes:
 * `$isEditing`: otro **booleano**, busca hacer que si es **true** los campos que muestre el modal sean editables o si es **false**, que sean texto plano.
 * `private function clearFields(){`: Añadimos las variables que queremos que sean limpiadas cuando el modal deba estar vacío.
 * `public function openModal(Diet $diet = null, bool $isEditing = false){`: Esta función es más compleja, lo primero, es que recibe dos cosas, un objeto **Diet**, que inicializa a null por defecto, y un booleano **$isEditing**, que nos permitirá saber si los campos llegan a ser o no editables. La función lo primero que hace es comprobar `if ($diet){`, es decir, **si $diet no es null**, en el caso de no serlo, hace que todas las **variables sean igualadas a los datos de esa dieta**, destacando `$this -> myDiet = $diet;`, que nos sirve para especificar que esta es la **dieta seleccionada**. Luego, tenemos el `} else {`, **si $diet es null** simplemente se llama a la función `$this -> clearFields();` para que los campos del modal estén vacíos. Terminando el **if/else**, hacemos dos cosas `$this -> isEditing = $isEditing;`, que **iguala nuestra variable a lo pasado por la función**, y por último, se hace que **el modal sea visible** con `$this->modal = true;`.
+
+### 6.2. EL MODAL EN LA VISTA
+Ahora vamos a volver a `resources/views/livewire/diets-table.blade.php` y vamos a añadir la lógica del modal justo antes de `</section>`:
+
+```
+@if ($modal){
+  <!-- component -->
+<div class="fixed left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 py-10">
+  <div class="max-h-full w-full max-w-xl overflow-y-auto sm:rounded-2xl bg-white">
+    <div class="w-full">
+      <div class="m-8 my-20 max-w-[400px] mx-auto">
+
+        <div class="mb-8">
+          <label for="name">Nombre de la dieta</label>
+          <input type="text" id="name" name="name" wire:model="Diet" 
+          value="{{ isset($myDiet) ? $myDiet->title : '' }}">
+        </div>
+
+        <div class="space-y-4">
+          <button class="p-3 bg-black rounded-full text-white w-full font-semibold">Allow notifications</button>
+          <button class="p-3 bg-white border rounded-full w-full font-semibold">Skip for now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+}
+    
+@endif
+```
+Vamos a ver qué hacemos aquí:
+* `@if ($modal)`: comprueba si la variable booleana en el componente es **true** para ejecutar su código.
+* **Modal**: cogido de ***livewirecomponents***, cualquiera nos vale, pero escogí uno que ya trajese botones incorporados para facilitar nuestro trabajo más adelante.
+* `<label>` e `<input>`, que por ahora, tenemos la lógica a la mitad en este código, pero analizamos que lo que hace la aplicación es poner un `<label>` que indicará el nombre del campo a informar, en el primer caso, ***Nombre de la dieta***, y justo al lado, un `<input>` al que le pasamos dos cosas importantes; `wire:model="Diet"`, que referencia al modelo al que corresponde, y `value="{{ isset($myDiet) ? $myDiet->title : '' }}"`, que le dará el valor al campo en el caso de ser una consulta de **edición**.
+* `@endif`: termina el if.
+
+Bien, como has podido notar, esto está incompleto, pero de momento, podemos dejarlo así, esto nos servirá para ver si nuestro modal coge algún dato ya de, si por ejemplo, *en la tabla seleccionamos la Dieta 1*, que nos muestre en el modal el nombre de esa dieta. Sin embargo, no tenemos definido **que los botones nos lleven a hacer aparecer el modal**.
+
+### 6.3. LOS BOTONES MUESTRAN EL MODAL
+En el componente **HTML**, definimos previamente algo muy importante, y es que los **3 iconos svg** y el **botón superior** de la tabla cuando son presionados, 
