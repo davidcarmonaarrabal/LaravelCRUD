@@ -510,7 +510,7 @@ Vale, aquí hacemos varias cosas que nos van a resultar interesantes:
 * `$modal`: es una variable **booleana**, busca hacer que cuando sea **true** el modal se muestre por pantalla, mientras que siendo **false** se oculte.
 * `$isEditing`: otro **booleano**, busca hacer que si es **true** los campos que muestre el modal sean editables o si es **false**, que sean texto plano.
 * `private function clearFields(){`: Añadimos las variables que queremos que sean limpiadas cuando el modal deba estar vacío.
-* `public function openModal(Diet $diet = null, bool $isEditing = false){`: Esta función es más compleja, lo primero, es que recibe dos cosas, un objeto **Diet**, que inicializa a null por defecto, y un booleano **$isEditing**, que nos permitirá saber si los campos llegan a ser o no editables. La función lo primero que hace es comprobar `if ($diet){`, es decir, **si $diet no es null**, en el caso de no serlo, hace que todas las **variables sean igualadas a los datos de esa dieta**, destacando `$this -> myDiet = $diet;`, que nos sirve para especificar que esta es la **dieta seleccionada**. Luego, tenemos el `} else {`, **si $diet es null** simplemente se llama a la función `$this -> clearFields();` para que los campos del modal estén vacíos. Terminando el **if/else**, hacemos dos cosas `$this -> isEditing = $isEditing;`, que **iguala nuestra variable a lo pasado por la función**, y por último, se hace que **el modal sea visible** con `$this->modal = true;`.
+* `public function openModal(Diet $diet = null, bool $isEditing = true){`: Esta función es más compleja, lo primero, es que recibe dos cosas, un objeto **Diet**, que inicializa a null por defecto, y un booleano **$isEditing**, que nos permitirá saber si los campos llegan a ser o no editables. La función lo primero que hace es comprobar `if ($diet){`, es decir, **si $diet no es null**, en el caso de no serlo, hace que todas las **variables sean igualadas a los datos de esa dieta**, destacando `$this -> myDiet = $diet;`, que nos sirve para especificar que esta es la **dieta seleccionada**. Luego, tenemos el `} else {`, **si $diet es null** simplemente se llama a la función `$this -> clearFields();` para que los campos del modal estén vacíos. Terminando el **if/else**, hacemos dos cosas `$this -> isEditing = $isEditing;`, que **iguala nuestra variable a lo pasado por la función**, y por último, se hace que **el modal sea visible** con `$this->modal = true;`.
 
 ### 6.2. EL MODAL EN LA VISTA
 Ahora vamos a volver a `resources/views/livewire/diets-table.blade.php` y vamos a añadir la lógica del modal justo antes de `</section>`:
@@ -568,6 +568,7 @@ Ahora vamos a volver a `resources/views/livewire/diets-table.blade.php` y vamos 
     
 @endif
 ```
+
 Vamos a ver qué hacemos aquí:
 * `@if ($modal)`: comprueba si la variable booleana en el componente es **true** para ejecutar su código.
 * **Modal**: cogido de ***livewirecomponents***, cualquiera nos vale, pero escogí uno que ya trajese botones incorporados para facilitar nuestro trabajo más adelante.
@@ -582,3 +583,13 @@ En el componente **HTML**, definimos previamente algo muy importante, y es que l
 * **En el caso de los svg** debemos meterlos dentro de un `<a></a>`, que usará el mismo `wire:click="openModal({{$diet, true}})"`, sólo que aquí, **las propiedades cambiarán** dependiendo del botón seleccionado, por ejemplo, el de ***ver la dieta*** pasará un `({{$diet}}, false)`, ya que *queremos ver una dieta específica pero no editar sus campos*, con el de ***borrar una dieta*** llamaremos a *otro método aún no creado* y con el de ***editar la dieta*** pasaremos `({{$diet}}, true)`, ya que *queremos ver los valores de la dieta y poder cambiarlos*.
 * `@if (isEditing)` usamos esto para definir cuándo el campo es editable o no, si no lo es, mostrará el texto en un `<p></p>`, pero al serlo, será un `<input></input>`.
 
+### 6.4. BOTÓN DE CERRAR EL MODAL
+Vale, ahora el modal, dijimos que *habíamos seleccionado uno con dos botones para usarlos*, pues empecemos a programar la funcionalidad del segundo botón, que es sencilla, aunque primero **cambiamos el nombre al botón**; `<button wire:click="closeModal" class="p-3 bg-white border rounded-full w-full font-semibold">Cerrar</button>`, al cuál le hemos añadido la funcionalidad del click, pero debemos ahora **programar el método closeModal** en `app/Livewire/DietsTable.php`:
+
+```
+ public function closeModal(){
+        $this->modal = false;
+    }
+```
+
+Tan simple como **cambiar el modal a false**.
