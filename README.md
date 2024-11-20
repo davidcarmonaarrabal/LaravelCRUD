@@ -414,6 +414,99 @@ Ahora, nos vamos a `resources/livewire/diets-table.blade.php` y añadimos la ló
 </section>
 ```
 
-Aquí, basicamente nos cogemos una *tabla pre-hecha* de **livewirecomponents** y a esta le creamos un `@foreach` para que **nos muestre cada una de las dietas de ese usuario** y terminamos el bucle con un `@endforeach`.
+Aquí, basicamente nos cogemos una *tabla pre-hecha* de **tailwindcomponents** y a esta le creamos un `@foreach` para que **nos muestre cada una de las dietas de ese usuario** y terminamos el bucle con un `@endforeach`.
 
 **Cabe resaltar** que al final de la tabla, metimos una tabla que usa ***svg's*** como iconos para que luego podamos darle una funcionalidad al ser clicados y que muestren los futuros **Modales**.
+
+Por último, para que esa tabla se muestre en nuestro *Dashboard*, debemos ir a `resources/views/dashboard.blade.php` y añadimos nuestro componente:
+
+```
+<x-app-layout>
+    <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
+    <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ Auth::user()->name }} Dashboard
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+                    {{ Auth::user()->name }}, estás dentro
+                </div>
+            </div>
+        </div>
+        <livewire:diets-table/>
+    </div>
+</x-app-layout>
+```
+
+Yo lo he añadido después de lo que te genera automáticamente el framework, usando `<livewire:diets-table/>` para meter el componente.
+
+**También resaltar** que he modificado la lógica de los mensajes dejándolos como `{{ Auth::user()->name }} Dashboard` y `{{ Auth::user()->name }}, estás dentro`, que hace que *muestre el nombre del usuario junto al texto*, quedando algo más estético y personalizado, es una mera curiosidad.
+
+## 6. EL MODAL Y LOS BOTONES
+Ahora vamos a empezar con lo más denso del ejercicio, la programación más real, que puede asustar un poco, pero realmente no es nada que no sepamos ya.
+
+### 6.1. LÓGICA DEL MODAL
+Bien, sabemos que tenemos una tabla, con **3** botones en cada columna que hacen funciones de *lectura, eliminación y actualización* sobre esos elementos en la **BBDD**, a parte, tenemos **otro botón más** arriba de la tabla, que hace la función de *escritura* de elementos, bien, sobre esta lógica, nosotros queremos en **3 de los 4** botones que se **nos abra una ventana modal** que nos permita, o bien, *insertar, actualizar o ver* los datos de una dieta.
+
+Para esto, es necesario que le demos una vuelta al archivo `app/Livewire/DietsTable.php`, consta resaltar que a partir de ahora estaremos saltando entre varios archivos, así que no siempre pondré todo el archivo completo de nuevo aquí en el MarkDown.
+
+```
+class DietsTable extends Component
+{
+    public $diets = [];
+    public $myDiet;
+    public $title;
+    public $fecha;
+    public $description;
+    public $totalCalories;
+    public $modal = false;
+    public $isEditing = false;
+
+    public function mount() {   
+        $this->diets = Diet::where('user_id', Auth::id())->get();
+    }
+    public function render()
+    {
+        return view('livewire.diets-table');
+    }
+
+    private function clearFields(){
+        $this->title = '';
+        $this->fecha = '';
+        $this->description = '';
+        $this->totalCalories = '';
+    }
+
+    private function createDiet(){
+        $this->clearFields();
+        $this->modal = true;
+    }
+
+    public function openModal(Diet $diet = null, bool $isEditing = false){
+        if ($diet){
+            $this -> title = $diet -> title;
+            $this -> fecha = $diet -> fecha;
+            $this -> description = $diet -> description;
+            $this -> totalCalories = $diet -> totalCalories;
+            $this -> myDiet = $diet;
+        } else {
+            $this -> clearFields();
+        }
+        $this -> isEditing = $isEditing;
+        $this->modal = true;
+    }
+}
+```
+
+Vale, aquí hacemos varias cosas que nos van a resultar interesantes:
+* Adición de variables: hemos añadido muchas variables, entre ellas, varias contienen *los datos de la tabla diet*, como `$title, $fecha, $description o $totalCalories`, que nos servirán para *enlazar los datos que queremos mostrar en el componente con los datos que existen en el modelo*.
+* `$myDiet`: es una variable que nos servirá como contenedor a la hora de, en la vista, *seleccionar una dieta específica* y que esta *le pase a la lógica la dieta en específico*.
+* `$modal`: es una variable **booleana**, busca hacer que cuando sea **true** el modal se muestre por pantalla, mientras que siendo **false** se oculte.
+* `$isEditing`: otro **booleano**, busca hacer que si es **true** los campos que muestre el modal sean editables o si es **false**, que sean texto plano.
+* `private function clearFields(){`: Añadimos las variables que queremos que sean limpiadas cuando el modal deba estar vacío.
+* `public function openModal(Diet $diet = null, bool $isEditing = false){`: Esta función es más compleja, lo primero, es que recibe dos cosas, un objeto **Diet**, que inicializa a null por defecto, y un booleano **$isEditing**, que nos permitirá saber si los campos llegan a ser o no editables. La función lo primero que hace es comprobar `if ($diet){`, es decir, **si $diet no es null**, en el caso de no serlo, hace que todas las **variables sean igualadas a los datos de esa dieta**, destacando `$this -> myDiet = $diet;`, que nos sirve para especificar que esta es la **dieta seleccionada**. Luego, tenemos el `} else {`, **si $diet es null** simplemente se llama a la función `$this -> clearFields();` para que los campos del modal estén vacíos. Terminando el **if/else**, hacemos dos cosas `$this -> isEditing = $isEditing;`, que **iguala nuestra variable a lo pasado por la función**, y por último, se hace que **el modal sea visible** con `$this->modal = true;`.
