@@ -45,7 +45,7 @@ return new class extends Migration
 
 **Remarcar** el `$table->date('fecha')->default(now());`, que nos ***coge la fecha actual*** y también el `$table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');` que nos define la ***Foreign Key*** y su **forma de ser borrada**.
 
-Recordar importar, en este caso, el `use Illuminate\Support\Facades\DB;` y el `use Illuminate\Support\Facades\Schema;`, aunque todo depende de la situación. Ahora vamos con la migración de **users**:
+Recordar importar, en este caso, el `use Illuminate\Support\Facades\DB;` y el `use Illuminate\Support\Facades\Schema;`, aunque todo *depende de la situación*. Ahora vamos con la migración de **users**:
 
 ```
     public function up(): void
@@ -164,8 +164,8 @@ class User extends Authenticatable
 
 Aquí, remarcamos varias cosas:
 * `use HasFactory, Notifiable, SoftDeletes;`: **importa lo necesario**.
-* `protected $fillable = [`: son los atributos que son rellenables en masa en la BBDD.
-* `protected $hidden = [`: son los atributos que no serán mostrados.
+* `protected $fillable = [`: son los atributos que son *rellenables en masa en la BBDD*.
+* `protected $hidden = [`: son los atributos que *no serán mostrados*.
 * `public function diets(): HasMany`: ***1:N***, *un usuario tiene una o más dietas*.
 
 ## 3. CREAMOS LOS SEEDERS
@@ -174,9 +174,6 @@ Ahora, *el ejercicio nos pide meter un usuario y una dieta de forma manual* usan
 ```
 class DietSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         DB::table('diets')->insert([
@@ -191,7 +188,7 @@ class DietSeeder extends Seeder
 }
 ```
 
-Aquí decimos dos cosas, *que cuando se ejecuten las migraciones*, se **cree** la ***Dieta1*** que hemos especificado ahí, y luego, que ***llame a la factoria*** para **crear 3 dietas más**, cosa que veremos más adelante.
+Aquí decimos dos cosas, *que cuando se ejecuten las migraciones*, se **cree** la ***Dieta1*** que hemos especificado ahí, y luego, que ***llame a la factoria*** para **crear 3 dietas más**, *cosa que el ejercicio nos pide más adelante*, cosa que veremos más adelante.
 
 Pasamos a `database/seeders/UserSeeder.php`:
 
@@ -217,7 +214,7 @@ class UserSeeder extends Seeder
 }
 ```
 
-Bien, lo mismo en esta migración, ahora sólo resta ir a `database/seeders/DatabaseSeeder.php` para decirle *que llame a las dos migraciones anteriores*:
+Bien, *lo mismo en esta migración*, ahora sólo resta ir a `database/seeders/DatabaseSeeder.php` para decirle **que llame a las dos migraciones anteriores**:
 
 ```
 class DatabaseSeeder extends Seeder
@@ -245,11 +242,6 @@ Las creamos con `php artisan make:factory DietFactory` y `php artisan make:facto
 ```
 class DietFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
@@ -262,21 +254,13 @@ class DietFactory extends Factory
 }
 ```
 
-Con esto, pedimos que inserte en la **BBDD** usando un ***fake*** en las *columnas seleccionadas*, y ahora psamos a `database/factories/UserFactory.php`:
+Con esto, pedimos que inserte en la **BBDD** usando un ***fake*** en las *columnas seleccionadas*, y ahora pasamos a `database/factories/UserFactory.php`:
 
 ```
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
     protected static ?string $password;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
@@ -290,11 +274,6 @@ class UserFactory extends Factory
         ];
     }
 
-   
-
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
     public function unverified(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -307,7 +286,7 @@ class UserFactory extends Factory
 Lo mismo que antes.
 
 ## 5. PASAMOS A LOS COMPONENTES:
-Vale, pasamos a lo interesante, una vez creado todo lo anterior, podemos empezar a *mostrar esos datos por pantalla*, para ello, nos vamos a centrar en mostrarlos en la *Dashboard*, cosas a tener en cuenta es comprobar antes de todo que esa página **usa bien los estilos**, ya que sino, tendremos que usar el comando `npm run dev` para activarlos.
+Vale, pasamos a lo interesante, una vez creado todo lo anterior, podemos empezar a **mostrar esos datos por pantalla**, para ello, nos vamos a centrar en mostrarlos en la *Dashboard*, cosas a tener en cuenta es comprobar antes de todo que esa página **usa bien los estilos**, ya que sino, tendremos que usar el comando `npm run dev` para activarlos, por ejemplo a mí, cada vez que reinicio el PC, tengo que usar el comando.
 
 Bien, ahora, antes de mostrar nada por pantalla, vamos a crear ***los controladores***, ejecutamos `php artisan make:livewire DietsTable`, aunque en mi caso, lo he llamado **DietsTable**, deberiamos añadirle al final un **Component**.
 
@@ -444,9 +423,9 @@ Por último, para que esa tabla se muestre en nuestro *Dashboard*, debemos ir a 
 </x-app-layout>
 ```
 
-Yo lo he añadido después de lo que te genera automáticamente el framework, usando `<livewire:diets-table/>` para meter el componente.
+Ahora este componente debe ser mostrado por ello, usando `<livewire:diets-table/>` en `resources/views/dashboard.blade.php` metemos el componente dónde veamos oportuno.
 
-**También resaltar** que he modificado la lógica de los mensajes dejándolos como `{{ Auth::user()->name }} Dashboard` y `{{ Auth::user()->name }}, estás dentro`, que hace que *muestre el nombre del usuario junto al texto*, quedando algo más estético y personalizado, es una mera curiosidad.
+**También resaltar** que he modificado la lógica de los mensajes dejándolos como `{{ Auth::user()->name }} Dashboard` y `{{ Auth::user()->name }}, estás dentro`, que hace que **muestre el nombre del usuario junto al texto**, quedando algo más estético y personalizado, es una mera curiosidad.
 
 ## 6. EL MODAL Y LOS BOTONES
 Ahora vamos a empezar con lo más denso del ejercicio, la programación más real, que puede asustar un poco, pero realmente no es nada que no sepamos ya.
@@ -454,7 +433,7 @@ Ahora vamos a empezar con lo más denso del ejercicio, la programación más rea
 ### 6.1. LÓGICA DEL MODAL
 Bien, sabemos que tenemos una tabla, con **3** botones en cada columna que hacen funciones de *lectura, eliminación y actualización* sobre esos elementos en la **BBDD**, a parte, tenemos **otro botón más** arriba de la tabla, que hace la función de *escritura* de elementos, bien, sobre esta lógica, nosotros queremos en **3 de los 4** botones que se **nos abra una ventana modal** que nos permita, o bien, *insertar, actualizar o ver* los datos de una dieta.
 
-Para esto, es necesario que le demos una vuelta al archivo `app/Livewire/DietsTable.php`, consta resaltar que a partir de ahora estaremos saltando entre varios archivos, así que no siempre pondré todo el archivo completo de nuevo aquí en el MarkDown.
+Para esto, es necesario que le demos una vuelta al archivo `app/Livewire/DietsTable.php`, consta resaltar que a partir de ahora estaremos *saltando entre varios archivos*, así que no siempre pondré todo el archivo completo de nuevo aquí en el MarkDown.
 
 ```
 class DietsTable extends Component
@@ -553,7 +532,6 @@ Ahora vamos a volver a `resources/views/livewire/diets-table.blade.php` y vamos 
           @else
             <p>{{$myDiet->totalCalories}}</p>
           @endif
-
 ```
 
 Vamos a ver qué hacemos aquí:
@@ -569,7 +547,7 @@ Bien, como has podido notar, esto está incompleto, pero de momento, podemos dej
 En el componente **HTML**, definimos previamente algo muy importante, y es que los **3 iconos svg** y el **botón superior** de la tabla cuando son presionados, llaman al método `openModal`, para esto, necesitamos varios pasos:
 * **En el caso del botón** debemos añadirle en las propiedades de la etiqueta un `wire:click="openModal"`, que significa que cuando es clickado, *livewire llama al componente* y ejecuta el método `openModal` pasándole ningún atributo, para que use los que tiene el método definidos por defecto.
 * **En el caso de los svg** debemos meterlos dentro de un `<a></a>`, que usará el mismo `wire:click="openModal({{$diet, true}})"`, sólo que aquí, **las propiedades cambiarán** dependiendo del botón seleccionado, por ejemplo, el de ***ver la dieta*** pasará un `({{$diet}}, false)`, ya que *queremos ver una dieta específica pero no editar sus campos*, con el de ***borrar una dieta*** llamaremos a *otro método aún no creado* y con el de ***editar la dieta*** pasaremos `({{$diet}}, true)`, ya que *queremos ver los valores de la dieta y poder cambiarlos*.
-* `@if (isEditing)` usamos esto para definir cuándo el campo es editable o no, si no lo es, mostrará el texto en un `<p></p>`, pero al serlo, será un `<input></input>`.
+* `@if (isEditing)` usamos esto para definir cuándo el campo **es editable o no**, si no lo es, mostrará el texto en un `<p></p>`, pero al serlo, será un `<input></input>`.
 
 ### 6.4. BOTÓN DE CERRAR EL MODAL
 Vale, ahora el modal, dijimos que *habíamos seleccionado uno con dos botones para usarlos*, pues empecemos a programar la funcionalidad del segundo botón, que es sencilla, aunque primero **cambiamos el nombre al botón**; `<button wire:click="closeModal" class="p-3 bg-white border rounded-full w-full font-semibold">Cerrar</button>`, al cuál le hemos añadido la funcionalidad del click, pero debemos ahora **programar el método closeModal** en `app/Livewire/DietsTable.php`:
@@ -583,7 +561,7 @@ Vale, ahora el modal, dijimos que *habíamos seleccionado uno con dos botones pa
 Tan simple como **cambiar el modal a false**.
 
 ### 6.5. BOTÓN DE GUARDAR/ACTUALIZAR UNA DIETA
-Bien, ahora debemos empezar con la lógica del primer botón, que o bien guardará la dieta y la insertará, o bien la actualizará, bien, lo primero es cambiar el **componente HTML**:
+Bien, ahora debemos empezar con la *lógica del primer botón*, que o bien guardará la dieta y la insertará, o bien la actualizará, bien, lo primero es cambiar el **componente HTML**:
 
 ```
         <div class="space-y-4">
@@ -598,7 +576,7 @@ Bien, ahora debemos empezar con la lógica del primer botón, que o bien guardar
 
 Bien, con esto hacemos que ***únicamente*** cuando los campos son editables se permita ver un **botón que permite guardar los cambios**, ya que si sólo estamos *viendo* no hay cambios que puedan ser guardados.
 
-A parte, estamos configurando que **el nombre del botón varie** dependiendo de si **la dieta es nula o no**, al no serlo, mostrará *actualizar dieta*, al ser nulo, *Crear dieta*.
+A parte, estamos configurando que **el nombre del botón varíe** dependiendo de si **la dieta es nula o no**, al no serlo, mostrará *actualizar dieta*, al ser nulo, *Crear dieta*.
 Pero, este botón llama a una nueva función, que o bien la crea o actualiza, pero que no hemos creado, por lo que nos vamos a ello:
 
 ```
@@ -646,7 +624,9 @@ Bien, esto es relativamente sencillo, simplemente hacemos la siguiente función:
     }
 ```
 
-Y la llamamos en el botón borrar:
+Esta función simplemente coge la dieta que le pasamos y la *borra*, realmente, aquí se ven *las ventajas de un framework*, en vez de tener una **consulta SQL que borra de una tabla**, el framework nos da un método llamado `delete()` que ya hace esto.
+
+Y llamamos la función en el botón borrar:
 
 ```
 <a wire:click="delete({{$diet}})" class="cursor-pointer">
@@ -654,4 +634,4 @@ Y la llamamos en el botón borrar:
                   </a>
 ```
 
-***PROYECTO TERMINADO***
+***PROYECTO TERMINADO, ÁNIMO A TODOS***
